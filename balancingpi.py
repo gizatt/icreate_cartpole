@@ -201,6 +201,7 @@ class AnalogIn():
             print "Failed to connect!"
 
 if __name__ == "__main__":
+    print "Usage: run with no args for sensor test; arg 1 for sinusoid motion test; arg 2 for direct control with pot; arg 3 for inverted pendulum behavior"
     balancer = Balancer()
     analogIn = AnalogIn()
     analogIn.connect('/dev/ttyACM0')
