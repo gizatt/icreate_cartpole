@@ -57,18 +57,20 @@ SINUSOID_AMPLITUDE = 500
 MIDANGLE = 0.5
 RANGE = 1.0
 
-K_P = 300
+K_P_TEST2 = 300
+K_P = 100
 
 class Balancer():
     lastDriveCommand = ''
 
-    def __init__(self):
-        self.performSinusoidTest = False
+    def __init__(self, test):
         self.sinusoid_period = SINUSOID_PERIOD
         self.sinusoid_start = time.time()
         self.sinusoid_amplitude =  SINUSOID_AMPLITUDE
-        self.testToPerform = 0
+        self.testToPerform = test
         self.connection = None
+        self.last_update = time.clock()
+        self.current_velocity = 0
 
     def __del__(self):
         if self.connection is not None:
@@ -88,7 +90,8 @@ class Balancer():
 
     def update(self, analogVal):
         theta = (analogVal - MIDANGLE)*2.*RANGE
-        print "Theta: ", theta
+        if (self.testToPerform == 0):
+            print "Theta: ", theta
         if self.testToPerform == 1:
             elapsed = (time.time() - self.sinusoid_start)
             velocity = self.sinusoid_amplitude*math.sin(elapsed/self.sinusoid_period*2*3.1415)
@@ -96,10 +99,16 @@ class Balancer():
             self.sendDriveCommand(velocity, rotation)
         elif self.testToPerform == 2:
             err = -theta
-            velocity = err * K_P
+            velocity = err * K_P_TEST2
             rotation = 0
-            print "velocity",  velocity
             self.sendDriveCommand(velocity, rotation)
+        elif self.testToPerform == 2:
+            err = -theta
+            self.current_velocity += err * K_P * (time.clock() - self.last_update)
+            self.last_update = time.clock()
+            print "Current vel: ", self.current_velocity
+            rotation = 0
+            self.sendDriveCommand(self.current_velocity, rotation)
 
     # sendCommandASCII takes a string of whitespace-separated, ASCII-encoded base 10 values to send
     def sendCommandASCII(self, command):
@@ -201,14 +210,14 @@ class AnalogIn():
             print "Failed to connect!"
 
 if __name__ == "__main__":
-    print "Usage: run with no args for sensor test; arg 1 for sinusoid motion test; arg 2 for direct control with pot; arg 3 for inverted pendulum behavior"
-    balancer = Balancer()
+    if len(sys.argv) == 1:
+        print "Usage: run with arg 0; arg 1 for sinusoid motion test; arg 2 for direct control with pot; arg 3 for inverted pendulum behavior"
+        exit(0)
+    balancer = Balancer(int(sys.argv[1]))
     analogIn = AnalogIn()
     analogIn.connect('/dev/ttyACM0')
     balancer.connect('/dev/ttyUSB0')
     balancer.reset()
-    if len(sys.argv) > 1:
-        balancer.testToPerform = int(sys.argv[1])
 
     while(1):
         analogIn.update()
