@@ -58,7 +58,7 @@ MIDANGLE = 0.5
 RANGE = 1.0
 
 K_P_TEST2 = 300
-K_P = 100
+K_P = 2000
 
 class Balancer():
     lastDriveCommand = ''
@@ -89,7 +89,11 @@ class Balancer():
 
 
     def update(self, analogVal):
-        theta = (analogVal - MIDANGLE)*2.*RANGE
+	if (analogVal>=0):
+            theta = (analogVal - MIDANGLE)*2.*RANGE
+        else:
+            theta = 0
+
         if (self.testToPerform == 0):
             print "Theta: ", theta
         if self.testToPerform == 1:
@@ -100,13 +104,14 @@ class Balancer():
         elif self.testToPerform == 2:
             err = -theta
             velocity = err * K_P_TEST2
+            print "Current vel: ", velocity
             rotation = 0
             self.sendDriveCommand(velocity, rotation)
-        elif self.testToPerform == 2:
+        elif self.testToPerform == 3:
             err = -theta
             self.current_velocity += err * K_P * (time.clock() - self.last_update)
             self.last_update = time.clock()
-            print "Current vel: ", self.current_velocity
+            print "Theta", theta, "Current vel: ", self.current_velocity
             rotation = 0
             self.sendDriveCommand(self.current_velocity, rotation)
 
