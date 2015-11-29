@@ -112,17 +112,17 @@ class Balancer():
             self.sendDriveCommand(velocity, rotation)
         elif self.testToPerform == 3:
             err = theta
-            derr = err - self.last_error
+            derr = (err - self.last_error) / (time.clock() - self.last_update)
             self.last_error = err
 
-            self.current_velocity += err * K_P * (time.clock() - self.last_update)
+            self.current_velocity += (err * K_P - derr * K_D) * (time.clock() - self.last_update)
             if (self.current_velocity > MAX_VEL):
                 self.current_velocity = MAX_VEL
             elif (self.current_velocity < -MAX_VEL):
                 self.current_velocity = -MAX_VEL
 
             self.last_update = time.clock()
-            print "Theta", theta, "Current vel: ", self.current_velocity
+            print "Theta", theta, "Current vel: ", self.current_velocity, "DDerr", derr
             rotation = 0
             self.sendDriveCommand(self.current_velocity, rotation)
 
