@@ -58,9 +58,9 @@ MIDANGLE = 0.577
 RANGE = 1.0
 
 K_P_TEST2 = 300
-K_D = 0
+K_D = 100
 MAX_VEL = 500
-K_P = 2000000
+K_P = 200000
 
 class Balancer():
     lastDriveCommand = ''
@@ -71,7 +71,7 @@ class Balancer():
         self.sinusoid_amplitude =  SINUSOID_AMPLITUDE
         self.testToPerform = test
         self.connection = None
-        self.last_update = time.clock()
+        self.last_update = time.time()
         self.current_velocity = 0
         self.last_error = 0
 
@@ -112,19 +112,21 @@ class Balancer():
             self.sendDriveCommand(velocity, rotation)
         elif self.testToPerform == 3:
             err = theta
-            derr = (err - self.last_error) / (time.clock() - self.last_update)
+            derr = (err - self.last_error) / (time.time() - self.last_update)
             self.last_error = err
 
-            self.current_velocity += (err * K_P - derr * K_D) * (time.clock() - self.last_update)
+            self.current_velocity += (err * K_P - derr * K_D) * (time.time() - self.last_update)
             if (self.current_velocity > MAX_VEL):
                 self.current_velocity = MAX_VEL
             elif (self.current_velocity < -MAX_VEL):
                 self.current_velocity = -MAX_VEL
 
-            self.last_update = time.clock()
             print "Theta", theta, "Current vel: ", self.current_velocity, "DDerr", derr
             rotation = 0
             self.sendDriveCommand(self.current_velocity, rotation)
+
+        self.last_update = time.time()
+
 
     # sendCommandASCII takes a string of whitespace-separated, ASCII-encoded base 10 values to send
     def sendCommandASCII(self, command):
@@ -234,7 +236,11 @@ if __name__ == "__main__":
     analogIn.connect('/dev/ttyACM0')
     balancer.connect('/dev/ttyUSB0')
     balancer.reset()
+    time.sleep(0.05)
 
     while(1):
         analogIn.update()
         balancer.update(analogIn.getAnalogOut())
+        while (time.time() - balancer.last_update < 0.001):
+             print time.time()
+             analogIn.update()
