@@ -59,6 +59,8 @@ RANGE = 1.0
 
 K_P_TEST2 = 300
 K_P = 2000
+K_D = 0
+MAX_VEL = 500
 
 class Balancer():
     lastDriveCommand = ''
@@ -71,6 +73,7 @@ class Balancer():
         self.connection = None
         self.last_update = time.clock()
         self.current_velocity = 0
+        self.last_error = 0
 
     def __del__(self):
         if self.connection is not None:
@@ -109,7 +112,15 @@ class Balancer():
             self.sendDriveCommand(velocity, rotation)
         elif self.testToPerform == 3:
             err = theta
+            derr = err - self.last_error
+            self.last_error = err
+
             self.current_velocity += err * K_P * (time.clock() - self.last_update)
+            if (self.current_velocity > MAX_VEL):
+                self.current_velocity = MAX_VEL
+            elif (self.current_velocity < -MAX_VEL):
+                self.current_velocity = -MAX_VEL
+
             self.last_update = time.clock()
             print "Theta", theta, "Current vel: ", self.current_velocity
             rotation = 0
