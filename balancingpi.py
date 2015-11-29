@@ -58,9 +58,9 @@ MIDANGLE = 0.577
 RANGE = 1.0
 
 K_P_TEST2 = 300
-K_P = 2000
 K_D = 0
 MAX_VEL = 500
+K_P = 200000
 
 class Balancer():
     lastDriveCommand = ''
