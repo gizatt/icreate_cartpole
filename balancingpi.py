@@ -102,13 +102,13 @@ class Balancer():
             rotation = 0
             self.sendDriveCommand(velocity, rotation)
         elif self.testToPerform == 2:
-            err = -theta
+            err = theta
             velocity = err * K_P_TEST2
             print "Current vel: ", velocity
             rotation = 0
             self.sendDriveCommand(velocity, rotation)
         elif self.testToPerform == 3:
-            err = -theta
+            err = theta
             self.current_velocity += err * K_P * (time.clock() - self.last_update)
             self.last_update = time.clock()
             print "Theta", theta, "Current vel: ", self.current_velocity
