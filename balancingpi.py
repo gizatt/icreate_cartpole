@@ -95,7 +95,7 @@ class Balancer():
             theta = 0
 
         if (self.testToPerform == 0):
-            print "Theta: ", theta
+            print "analogVal:", analogVal, ", Theta: ", theta
         if self.testToPerform == 1:
             elapsed = (time.time() - self.sinusoid_start)
             velocity = self.sinusoid_amplitude*math.sin(elapsed/self.sinusoid_period*2*3.1415)
